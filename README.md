@@ -4,14 +4,26 @@ This command line interface program was created to fulfill lab 4 of Oakton's CSC
 
 The command line program can be run at [this Replit link](https://replit.com/@john-albright/client-array-search-and-sort-console).
 
-The program allows the user to work with arrays populated with client names and numbers. There are three pathways: 
-- search (S) 
-- binary search (B) 
-- modify (M)
+The project is linked to an SQLite database using the [sqlite-jdbc driver](https://github.com/xerial/sqlite-jdbc). Therefore, to successfully run the program, one may have to use the command
 
-The second pathway B has three other pathways: 
+```
+java -classpath ".:sqlite-jdbc-3.36.0.3.jar" ArraySearchAndSort
+```
+
+after compiling the java program.
+
+The program allows the user to work with arrays populated with client names and numbers. There are three pathways: 
+- add (A): user can add a client to the database
+- binary search (B): user can perform a binary search using the roster
+- modify (M): user can modify a client name or number
+- print (P): user can print out the entire contents of the clients table in the clients.db
+- remove (R): user can remove a client name or number
+- search (S): user can search for a client name or number
+- exit (X): user can exit the program
+
+The binary search pathway requires that the array be sorted. The user can select from three sort methods: 
 - A (java's built-in array sort)
 - B (bubble sort)
 - I (insertion sort)
 
-The user is then asked to access the client using the name or number. The position on the roster and the client's name and number are returned to the console as well as the full roster (potentially sorted). 
+For modify, remove, and search pathways, the user must select the client using the client's name or number. The position on the roster and the client's name and number are returned to the console as well as the full roster (potentially sorted). 
