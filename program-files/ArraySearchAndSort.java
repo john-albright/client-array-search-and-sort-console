@@ -33,7 +33,6 @@ import java.util.Scanner;
 import java.util.Date;
 import java.util.InputMismatchException;
 import java.text.SimpleDateFormat;
-import java.io.File;
 import java.util.Arrays;
 import java.lang.Math;
 
@@ -224,7 +223,7 @@ public class ArraySearchAndSort {
                         if (sortChoice == 'A') {
                             validSort = true;
                             Arrays.sort(myClientNumbersCopy);
-                           Arrays.sort(myClientsCopy);
+                            Arrays.sort(myClientsCopy);
                         } else if (sortChoice == 'B') {
                             validSort = true;
                             bubbleSortInt(myClientNumbersCopy);
@@ -359,9 +358,14 @@ public class ArraySearchAndSort {
                 }
                 // HANDLE incorrect input
                 else {
-                    System.out.println("Not a valid command.\n");
+                    System.out.println("\nNot a valid command.\n");
                 }
 
+                if (choiceConv != 'X') {
+                    // Pause the program and have the user press any key to enter
+                    System.out.print("\nPress any key and enter to continue --> ");
+                    sc.next();
+                }
             } while (!stopProgram);
 
             // Close the scanner sc
@@ -423,7 +427,7 @@ public class ArraySearchAndSort {
             int associatedClientNo = myClientNumbers[arrayPosClientNo];
             System.out.printf(" >> %s's client number is %d.\n\n", clientToLookFor, associatedClientNo);
         } catch (ArrayIndexOutOfBoundsException ex1) {
-            System.out.println("\nNo associated client number found.\n");
+            System.out.println("\n >> No associated client number found.\n");
         }
     }
 
@@ -479,7 +483,7 @@ public class ArraySearchAndSort {
             System.out.printf(" >> %d is the client number of %s.\n\n", 
                               clientNumberToLookFor, associatedClientName);
         } catch (ArrayIndexOutOfBoundsException ex3) {
-            System.out.println("\nNo associated client name found.\n");
+            System.out.println("\n >> No associated client name found.\n");
         }
     }
 
@@ -517,7 +521,7 @@ public class ArraySearchAndSort {
         try {
             associatedClientName = myClients[arrayPosClientName];
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("\nNo associated client name found.\n");
+            System.out.println("\n >> No associated client name found.\n");
             return;
         }
         
@@ -596,7 +600,7 @@ public class ArraySearchAndSort {
         try {
             associatedClientNo = myClientNumbers[arrayPosClientNo];
         } catch (ArrayIndexOutOfBoundsException ex1) {
-            System.out.println("\nNo associated client number found.\n");
+            System.out.println("\n >> No associated client number found.\n");
             return;
         }
 
@@ -658,7 +662,7 @@ public class ArraySearchAndSort {
         try {
             associatedClientName = myClients[arrayPosClientName];
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("\nNo associated client name found.\n");
+            System.out.println("\n >> No associated client name found.\n");
             return;
         }
 
@@ -722,7 +726,7 @@ public class ArraySearchAndSort {
         try {
             associatedClientNo = myClientNumbers[arrayPosClientNo];
         } catch (ArrayIndexOutOfBoundsException ex1) {
-            System.out.println("\nNo associated client number found.\n");
+            System.out.println("\n >> No associated client number found.\n");
             return;
         }
 
@@ -809,7 +813,7 @@ public class ArraySearchAndSort {
 
     /**
      * Performs binary search on an array of integers
-     * Precondition: searched integer must be in the array
+     * 
      * @param array array of integers to be searched through
      * @param int int to be searched for
      * @return the index of the integer if exists in array or
@@ -823,9 +827,6 @@ public class ArraySearchAndSort {
         int half = ((upper + lower) / 2);
         int index = half;
         int checker = 0;
-
-        // Check to see that the precondition is met using linear search
-        // if (linSearchInt(intArray, search) == -1) return -1;
 
         while (index >= 0) {
             checker = index;
@@ -844,8 +845,7 @@ public class ArraySearchAndSort {
                 lower = index;
                 index = (int)Math.ceil((upper + lower) / 2);
             }
-            //index = (upper + lower) / 2;
-            System.out.println(upper + ", " + lower + ", " + index);
+            //System.out.println(upper + ", " + lower + ", " + index);
             if (index == checker) {
                 break;
             }
@@ -1240,7 +1240,10 @@ public class ArraySearchAndSort {
     */ 
     public static String[] insertionSortStr(String[] strArray) {
         int length = strArray.length;
-        String tempStr, temp;
+        String tempStr = "";
+        String temp;
+        int thisLength, nextLength, minLength;
+        boolean endLoop = false;
 
         for (int j = 0; j < length - 1; j++) {
             if (strArray[j].charAt(0) > strArray[j+1].charAt(0)) {
@@ -1254,8 +1257,32 @@ public class ArraySearchAndSort {
 
                     while (movingComp > 0) {
                         if (strArray[tracker].charAt(0) > strArray[movingComp].charAt(0)) break;
+                        else if (strArray[tracker].charAt(0) == strArray[movingComp].charAt(0)) {
+                            thisLength = strArray[tracker].length();
+                            nextLength = strArray[movingComp].length();
+                            minLength = thisLength > nextLength ? nextLength : thisLength;
+                            endLoop = false;
+
+                            for (int z = 0; z < minLength; z++) {
+                                if (strArray[tracker].charAt(z) == strArray[movingComp].charAt(z)) {
+                                    continue;
+                                } else if (strArray[tracker].charAt(z) > strArray[movingComp].charAt(z)) {
+                                    endLoop = true;
+                                    break;
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            if (endLoop) {
+                                break;
+                            }
+                        }
+
                         movingComp--;
                     }
+                    
+                    //System.out.println(strArray[movingComp] + " " + strArray[tracker]);
 
                     if (movingComp != 0 && strArray[tracker].charAt(0) >= strArray[movingComp].charAt(0)) {
                         tempStr = strArray[movingComp+1];
@@ -1265,10 +1292,37 @@ public class ArraySearchAndSort {
                         strArray[movingComp] = strArray[tracker];
                     }
 
+                    //System.out.println(Arrays.toString(strArray));
+
                     while (tracker > movingComp) {
                         if (tracker == movingComp+1) {
                             if (strArray[tracker].charAt(0) < tempStr.charAt(0)) {
                                 strArray[tracker+1] = tempStr;
+                            } else if (strArray[tracker].charAt(0) == tempStr.charAt(0)) { 
+                                thisLength = strArray[tracker].length();
+                                nextLength = strArray[movingComp].length();
+                                minLength = thisLength > nextLength ? nextLength : thisLength;
+                                
+                                for (int z = 0; z < minLength; z++) {
+                                    if (strArray[tracker].charAt(z) == tempStr.charAt(z)) {
+                                        continue;
+                                    } else if (strArray[tracker].charAt(z) < tempStr.charAt(z)) {
+                                        //System.out.println("tracker: " + tracker);
+                                        //System.out.println("movingComp: " + movingComp);
+                                        //System.out.println(strArray[tracker]);
+                                        strArray[tracker+1] = tempStr;
+                                        //System.out.println(strArray[tracker]);
+                                        break;
+                                    } else {
+                                        //System.out.println("tracker: " + tracker);
+                                        //System.out.println("movingComp: " + movingComp);
+                                        //System.out.println(strArray[tracker]);
+                                        strArray[tracker] = tempStr;
+                                        //System.out.println(strArray[tracker]);
+                                        break;
+                                    }
+                                }
+
                             } else {
                                 strArray[tracker] = tempStr;
                             }
@@ -1281,7 +1335,7 @@ public class ArraySearchAndSort {
             }
             // Print out the arrays at each step 
             // Show the sorting in action
-            System.out.println(Arrays.toString(strArray));
+            System.out.println("Step " + (j+1) + ": " + Arrays.toString(strArray));
         }
         return strArray;
     }    
