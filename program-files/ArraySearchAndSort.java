@@ -228,11 +228,11 @@ public class ArraySearchAndSort {
                         } else if (sortChoice == 'B') {
                             validSort = true;
                             bubbleSortInt(myClientNumbersCopy);
-                           bubbleSortStr(myClientsCopy);
+                            bubbleSortStr(myClientsCopy);
                         } else if (sortChoice == 'I') {
                             validSort = true;
                             insertionSortInt(myClientNumbersCopy);
-                           insertionSortStr(myClientsCopy);
+                            insertionSortStr(myClientsCopy);
                         } else {
                             System.out.print("\nNot a valid sort type. ");
                             System.out.print("Enter a valid sort type (A, B, I) --> ");
@@ -391,7 +391,7 @@ public class ArraySearchAndSort {
      * search is done via binary search. If the third
      * parameter is 'L', the search is done via linear
      * search. This method calls one of two other
-     * functions: linSearchString or binarySearchString.
+     * functions: linSearchStr or binarySearchStr.
      * @param array array of strings
      * @param array array of integers of the same length
      * @param char char to select which type of search
@@ -527,13 +527,28 @@ public class ArraySearchAndSort {
         
         // Prompt the user to enter in a new client number
         do {
-            System.out.printf("Enter in the new client number to replace %d: ", clientNumberToLookFor);
+            System.out.printf("Enter the new client number to replace %d: ", clientNumberToLookFor);
             try {
                 newClientNumber = sc.nextInt();
+
+                if (newClientNumber == 0) {
+                    throw new Exception();
+                }
+
+                for (int clientNumber : myClientNumbers) {
+                    if (clientNumber == newClientNumber) {
+                        throw new Exception();
+                    }
+                }
+
                 inputCheck2 = true;
-            } catch (InputMismatchException ex2) {
+
+            } catch (InputMismatchException e) {
                 sc.next();
                 System.out.print("Please enter a valid integer --> ");
+            } catch (Exception e) {
+                sc.next();
+                System.out.print("Please enter an integer other than 0 or one that's already in the database --> ");
             }
         } while (!inputCheck2);
         
@@ -810,20 +825,24 @@ public class ArraySearchAndSort {
         int checker = 0;
 
         // Check to see that the precondition is met using linear search
-        if (linSearchInt(intArray, search) == -1) return -1;
+        // if (linSearchInt(intArray, search) == -1) return -1;
 
         while (index >= 0) {
             checker = index;
             if (search == intArray[index]) {
                 return index;
             } else if (search < intArray[index]) {
+                if (upper == index) {
+                    return -1;
+                }
                 upper = index;
                 index = (int)Math.floor((upper + lower) / 2);
             } else if (search > intArray[index]) {
+                if (lower == index) {
+                    return -1;
+                }
                 lower = index;
                 index = (int)Math.ceil((upper + lower) / 2);
-                //if (index == length - 3) index = length - 1;
-                //else index = (upper + lower - 1) / 2;
             }
             //index = (upper + lower) / 2;
             System.out.println(upper + ", " + lower + ", " + index);
@@ -836,8 +855,8 @@ public class ArraySearchAndSort {
 
     /**
      * Performs binary search on an array of strings
-     * Precondition: searched string must be in the array
-     * Limitation: only sorts up to the second letter in 
+     * 
+     * Limitation: only searches up to the second letter in 
      *             a word
      * @param array array of strings to be searched through
      * @param int string to be searched for
@@ -846,32 +865,49 @@ public class ArraySearchAndSort {
      * 
      */
     public static int binarySearchStr(String strArray[], String search) {
+        int thisLength, nextLength, minLength;
+        
         int length = strArray.length;
         int index = ((length - 1) / 2);
         int upper = length - 1;
         int lower = 0;
-        
-        // Check to see that the precondition is met
-        if (!Arrays.asList(strArray).contains(search)) return -1;
 
         while (index >= 0) {
-            if (search.equals(strArray[index])) {
+            if (search.equalsIgnoreCase(strArray[index])) {
                 return index;
             }
             else if (search.toLowerCase().charAt(0) < strArray[index].toLowerCase().charAt(0)) {
+                if (upper == index) {
+                    return -1;
+                }
                 upper = index;
                 index = (upper + lower) / 2;
             } else if (search.toLowerCase().charAt(0) > strArray[index].toLowerCase().charAt(0)) {
+                if (lower == index) {
+                    return -1;
+                }
                 lower = index;
                 if (index == length - 2) index = length - 1;
                 else index = (upper + lower) / 2;
-            } else if (search.toLowerCase().charAt(0) == strArray[index].toLowerCase().charAt(0) 
-                     && search.toLowerCase().charAt(1) != strArray[index].toLowerCase().charAt(1)) {
-                if (search.toLowerCase().charAt(1) > strArray[index].toLowerCase().charAt(1)) {
-                    lower = index;
-                } else upper = index;
+            } else if (search.toLowerCase().charAt(0) == strArray[index].toLowerCase().charAt(0)) {
+                thisLength = search.length();
+                nextLength = strArray[index].length();
+                minLength = thisLength > nextLength ? nextLength : thisLength;
+
+                for (int z = 1; z < minLength; z++) {
+                    if (search.toLowerCase().charAt(z) > strArray[index].toLowerCase().charAt(z)) {
+                        lower = index;
+                        break;
+                    } else if (search.toLowerCase().charAt(z) == strArray[index].toLowerCase().charAt(z)) {
+                        continue;
+                    } else {
+                        upper = index;
+                        break;
+                    }
+                }
                 index = (upper + lower) / 2;
             }
+            //System.out.println(index);
         }
         return -1;
     }
@@ -924,34 +960,39 @@ public class ArraySearchAndSort {
      * @return the same array but sorted alphabetically
      */
     public static String[] bubbleSortStr(String[] strArray) {
+        String tempStr;
+        int thisLength, nextLength, minLength;
         int length = strArray.length;
 
         for (int i = 0; i < length - 1; i++) {
             int equalityCounter = 0;
             for (int j = 0; j < length - 1; j++) {
-                // Swap the strings if the first one starts with a letter
                 if (strArray[j].charAt(0) > strArray[j+1].charAt(0)) {
-                    String tempStr = strArray[j+1];
+                    //System.out.println("GREATER: " + strArray[j] + " versus " + strArray[j+1]);
+                    tempStr = strArray[j+1];
                     strArray[j+1] = strArray[j];
                     strArray[j] = tempStr;
-                } else if (strArray[j].charAt(0) == strArray[j].charAt(0)) {
-                    int jLength = strArray[j].length();
-                    int nextLength = strArray[j+1].length();
-                    
-                    int minLength = jLength > nextLength ? nextLength : jLength;
+
+                } else if (strArray[j].charAt(0) == strArray[j+1].charAt(0)) {
+                    //System.out.println("EQUAL: " + strArray[j] + " versus " + strArray[j+1]);
+                    thisLength = strArray[j].length();
+                    nextLength = strArray[j+1].length();
+                    minLength = thisLength > nextLength ? nextLength : thisLength;
+
                     for (int z = 1; z < minLength; z++) {
+                        //System.out.println(strArray[j].charAt(z) + " versus " + strArray[j+1].charAt(z));
                         if (strArray[j].charAt(z) > strArray[j+1].charAt(z)) {
-                            String tempStr = strArray[j+1];
+                            tempStr = strArray[j+1];
                             strArray[j+1] = strArray[j];
                             strArray[j] = tempStr;
+                            break;
                         } else if (strArray[j].charAt(z) == strArray[j+1].charAt(z)) {
                             continue;
                         } else if (strArray[j].charAt(z) < strArray[j+1].charAt(z)) {
                             break;
                         }
                     }
-                }
-                else {
+                } else {
                     equalityCounter++;
                 }
             }
@@ -1021,6 +1062,15 @@ public class ArraySearchAndSort {
         System.out.println();
     }
 
+    /**
+     * Prints a footer with a summary of pathways obtained 
+     * in the current session and the contents of the original clients table
+     * and the modified clients table
+     *
+     * @param array array of strings
+     * @param array array of integers
+     * 
+     */ 
     public static void printFooter() {
         Date myDate = new Date();
         String myDateFormat = "MM/dd/yyy";
@@ -1029,11 +1079,11 @@ public class ArraySearchAndSort {
         System.out.println("---------- Session Summary ---------");
         System.out.println("------------------------------------\n");
         System.out.println("Pathways accessed: " + pathwaysAccessed + "\n");
-        System.out.println("\n---- Original -----  ----- Changes -----");
-        System.out.printf("%-10s", "Name");
-        System.out.printf("%-10s", "Number");
-        System.out.printf("%-10s", "Name");
-        System.out.printf("%-10s\n", "Number");
+        System.out.println("\n----- Original ------  ------ Changes ------");
+        System.out.printf("%-12s", "Name");
+        System.out.printf("%-12s", "Number");
+        System.out.printf("%-12s", "Name");
+        System.out.printf("%-12s\n", "Number");
 
         int originalLen = myClientsOriginal.length;
         int newLen = myClientsCopy.length;
@@ -1044,8 +1094,8 @@ public class ArraySearchAndSort {
 
         for (int i = 0; i < endpoint ; i++) {
             if (i < originalLen && myClientsOriginal[i] != null) {
-                System.out.printf("%-10s", myClientsOriginal[i]);
-                System.out.printf("%-10d", myClientNumbersOriginal[i]);
+                System.out.printf("%-12s", myClientsOriginal[i]);
+                System.out.printf("%-12d", myClientNumbersOriginal[i]);
                 
                 if (endOfCopy) {
                     System.out.println();
@@ -1057,11 +1107,11 @@ public class ArraySearchAndSort {
 
             if (i < newLen && myClientsCopy[i] != null ) {
                 if (endOfOriginal) {
-                    System.out.printf("%-20s", " ");
+                    System.out.printf("%-24s", " ");
                 }
 
-                System.out.printf("%-10s", myClients[i]);
-                System.out.printf("%-10d\n", myClientNumbers[i]);
+                System.out.printf("%-12s", myClients[i]);
+                System.out.printf("%-12d\n", myClientNumbers[i]);
             } else {
                 endOfCopy = true;
             }
@@ -1190,11 +1240,12 @@ public class ArraySearchAndSort {
     */ 
     public static String[] insertionSortStr(String[] strArray) {
         int length = strArray.length;
+        String tempStr, temp;
 
         for (int j = 0; j < length - 1; j++) {
             if (strArray[j].charAt(0) > strArray[j+1].charAt(0)) {
                 if (j == 0 || strArray[j+1].charAt(0) > strArray[j-1].charAt(0)) {   
-                    String temp = strArray[j];
+                    temp = strArray[j];
                     strArray[j] = strArray[j+1];
                     strArray[j+1] = temp;
                 } else {
@@ -1206,7 +1257,6 @@ public class ArraySearchAndSort {
                         movingComp--;
                     }
 
-                    String tempStr;
                     if (movingComp != 0 && strArray[tracker].charAt(0) >= strArray[movingComp].charAt(0)) {
                         tempStr = strArray[movingComp+1];
                         strArray[movingComp+1] = strArray[tracker];
