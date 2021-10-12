@@ -26,7 +26,7 @@ The program allows the user to work with arrays populated with client names and 
 - exit (X): user can exit the program
 
 The binary search pathway requires that the array be sorted. The user can select from three sort methods: 
-- A (java's built-in array sort)
+- A (the sort found in the java.util.Arrays package)
 - B (bubble sort)
 - I (insertion sort)
 

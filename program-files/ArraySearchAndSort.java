@@ -102,13 +102,21 @@ public class ArraySearchAndSort {
             boolean validYN = false;
             boolean validNaNo = false;
             boolean validSort = false;
-            boolean validNumber = false; 
+            boolean validNumber = false;
+            boolean invalidChoice = false; 
+            boolean printOption = false; 
+            boolean validPrint = false; 
             
             // Declare all other variables
-            char YesNoCheck, sortChoice, choiceConv;
+            char YesNoCheck, sortChoice, choiceConv, printChoice;
             String firstTwoCharB, firstTwoCharM, firstTwoCharS, choice, newClientName, 
                    SQLStatement;
             int newClientNumber = 0;
+
+            System.out.println("\n--------------------------------------------");
+            System.out.println("------------- Clients Database -------------");
+            System.out.println("----------- Array Search and Sort ----------");
+            System.out.println("--------------------------------------------\n");
         
             do {
 
@@ -224,14 +232,36 @@ public class ArraySearchAndSort {
                             validSort = true;
                             Arrays.sort(myClientNumbersCopy);
                             Arrays.sort(myClientsCopy);
-                        } else if (sortChoice == 'B') {
+                        } else if (sortChoice == 'B' || sortChoice == 'I') {
                             validSort = true;
-                            bubbleSortInt(myClientNumbersCopy);
-                            bubbleSortStr(myClientsCopy);
-                        } else if (sortChoice == 'I') {
-                            validSort = true;
-                            insertionSortInt(myClientNumbersCopy);
-                            insertionSortStr(myClientsCopy);
+
+                            // Ask user if he or she would like to see the sorting
+                            System.out.print("Would you like to see the sorting in action? ");
+                            
+                            do {
+                                printChoice = sc.next().toUpperCase().charAt(0);
+
+                                if (printChoice == 'Y') {
+                                    printOption = true;
+                                    validPrint = true; 
+                                } else if (printChoice == 'N') {
+                                    printOption = false;
+                                    validPrint = true; 
+                                } else {
+                                    System.out.print("Please enter Y or N --> ");
+                                    validPrint = false;
+                                }
+
+                            } while (!validPrint);
+                            
+                            if (sortChoice == 'B') {
+                                bubbleSortInt(myClientNumbersCopy, printOption);
+                                bubbleSortStr(myClientsCopy, printOption);
+                            } else if (sortChoice == 'I') {
+                                insertionSortInt(myClientNumbersCopy, printOption);
+                                insertionSortStr(myClientsCopy, printOption);
+                            }
+
                         } else {
                             System.out.print("\nNot a valid sort type. ");
                             System.out.print("Enter a valid sort type (A, B, I) --> ");
@@ -248,16 +278,16 @@ public class ArraySearchAndSort {
                         // Search using binary search and print out the sorted array
                         if (firstTwoCharB.equalsIgnoreCase("na")) {
                             validNaNo = true;
-                            clientNameSearch(myClientsCopy, myClientNumbersCopy, 'B');
-                            printArrays(myClientsCopy, myClientNumbersCopy);
+                            clientNameSearch(myClientsCopy, myClientNumbers, 'B');
+                            //printArrays(myClientsCopy, myClientNumbersCopy);
                        }
                         else if (firstTwoCharB.equalsIgnoreCase("no") || firstTwoCharB.equalsIgnoreCase("nu")) {
                             validNaNo = true;
-                            clientNumberSearch(myClientsCopy, myClientNumbersCopy, 'B');
-                            printArrays(myClientsCopy, myClientNumbersCopy);
+                            clientNumberSearch(myClients, myClientNumbersCopy, 'B');
+                            //printArrays(myClientsCopy, myClientNumbersCopy);
                        } else {
                             validNaNo = false;
-                            System.out.print("\nPlease enter a valid value.");
+                            continue;
                         }
                     }
                 }
@@ -291,7 +321,7 @@ public class ArraySearchAndSort {
                 // REMOVE PATHWAY
                 else if (choiceConv == 'R') {
                     // Call method to get name or number from the user
-                    firstTwoCharM = nameOrNumber("modify");
+                    firstTwoCharM = nameOrNumber("remove");
 
                     // Create three pathways: number, name, exit
                     // Repopulate array if removal made
@@ -319,11 +349,11 @@ public class ArraySearchAndSort {
                     validNaNo = false;
 
                     System.out.print("\nHow would you like to search? ");
+
                     // Search using the linear search
                     while(!validNaNo) {
                         // Call method to get name or number from the user
                         firstTwoCharS = nameOrNumber("search for");
-                        
                         if (firstTwoCharS.equalsIgnoreCase("nu") || firstTwoCharS.equalsIgnoreCase("no")) {
                             validNaNo = true;
                             clientNumberSearch(myClients, myClientNumbers, 'L');
@@ -332,13 +362,13 @@ public class ArraySearchAndSort {
                             clientNameSearch(myClients, myClientNumbers, 'L');
                         } else {
                             validNaNo = false;
-                            System.out.print("\nPlease enter a valid value.");
+                            //System.out.print("\nPlease enter 'na' or 'no'/'nu' --> ");
                         }
                     }
                 } 
                 // EXIT PROGRAM
                 else if (choiceConv == 'X') {
-                    System.out.print("\nAre you sure you would like to exit?  ");
+                    System.out.print("\nAre you sure you would like to exit? ");
                     
                     validYN = false;
 
@@ -358,18 +388,31 @@ public class ArraySearchAndSort {
                 }
                 // HANDLE incorrect input
                 else {
-                    System.out.println("\nNot a valid command.\n");
+                    System.out.println("\nNot a valid command.");
+                    invalidChoice = true;
+
                 }
 
-                if (choiceConv != 'X') {
-                    // Pause the program and have the user press any key to enter
-                    System.out.print("\nPress any key and enter to continue --> ");
-                    sc.next();
+                // Pause the program and have the user press any key to enter
+                if (!invalidChoice && choiceConv != 'X') {
+                    
+                    System.out.print("\nPress enter to continue --> ");
+                    try {
+                        System.in.read();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    
+                    invalidChoice = false;
                 }
             } while (!stopProgram);
 
             // Close the scanner sc
             sc.close();
+            
+            // Make sure arrays have the proper sizes
+            setArraySize();
+            populateArrays(myClientsCopy, myClientNumbersCopy);
 
             // Declare a date object to print out the current date
             printFooter();
@@ -401,33 +444,33 @@ public class ArraySearchAndSort {
      * @param char char to select which type of search
      * 
      */
-    static public void clientNameSearch(String myClients[], int myClientNumbers[], char searchType) {
+    static public void clientNameSearch(String clients[], int clientNumbers[], char searchType) {
         int arrayPosClientNo = -1;
         
         // Prompt the user to type the name of a client
-        System.out.print("Please enter a client's name: ");
+        System.out.print("\nPlease enter a client's name: ");
 
         // Scan the client name entered and store it in a variable
         String clientToLookFor = sc.next();
 
         // Call the linear or binary search int methods 
         if (searchType == 'B') {
-            arrayPosClientNo = binarySearchStr(myClients, clientToLookFor);
+            arrayPosClientNo = binarySearchStr(clients, clientToLookFor);
         } else if (searchType == 'L') {
-            arrayPosClientNo = linSearchString(myClients, clientToLookFor);
+            arrayPosClientNo = linSearchString(clients, clientToLookFor);
         } else {
-            System.out.println("Invalid argument.");
+            System.out.println("Invalid argument -- search type must be 'B' or 'L'");
         }
         // Print out the position of the client in the list if it was found
-        if (arrayPosClientNo > 0)
-        System.out.println("\n >> Client found at position " + (arrayPosClientNo + 1) + " on the roster.");
+        if (arrayPosClientNo >= 0)
+            System.out.println("\n >> Client found at position " + (arrayPosClientNo + 1) + " on the sorted list of client names.");
 
         // Try to find the associated client number
         try {
-            int associatedClientNo = myClientNumbers[arrayPosClientNo];
+            int associatedClientNo = myClientNumbers[linSearchString(myClients, clientToLookFor)];
             System.out.printf(" >> %s's client number is %d.\n\n", clientToLookFor, associatedClientNo);
         } catch (ArrayIndexOutOfBoundsException ex1) {
-            System.out.println("\n >> No associated client number found.\n");
+            System.out.println("\n >> No client " + clientToLookFor + " found.");
         }
     }
 
@@ -446,7 +489,7 @@ public class ArraySearchAndSort {
      * @param char char to select which type of search
      * 
      */
-    public static void clientNumberSearch(String myClients[], int myClientNumbers[], char searchType) {
+    public static void clientNumberSearch(String clients[], int clientNumbers[], char searchType) {
         // Declare variables to be used in this method
         boolean inputCheck = false;
         int clientNumberToLookFor = -1;
@@ -454,36 +497,36 @@ public class ArraySearchAndSort {
 
         // Try to scan and store an integer value 
         do {
-            System.out.print("Please enter a client's number: ");
+            System.out.print("\nPlease enter a client's number: ");
             
             try {
                 clientNumberToLookFor = sc.nextInt();
                 inputCheck = true;
             } catch (InputMismatchException error) {
                 sc.next();
-                System.out.println("Please enter a valid integer --> ");
+                System.out.print("Please enter a valid integer --> ");
             }
         } while (!inputCheck);
 
         // Call the linear or binary search int methods 
         if (searchType == 'B') {
-            arrayPosClientName = binarySearchInt(myClientNumbers, clientNumberToLookFor);
+            arrayPosClientName = binarySearchInt(clientNumbers, clientNumberToLookFor);
         } else if (searchType == 'L') {
-            arrayPosClientName = linSearchInt(myClientNumbers, clientNumberToLookFor);
+            arrayPosClientName = linSearchInt(clientNumbers, clientNumberToLookFor);
         } else {
             System.out.println("\nInvalid argument.");
         }
         
         // Print out the position of the client in the list if found
-        if (arrayPosClientName > 0)
-        System.out.println("\n >> Client number found at position " + (arrayPosClientName + 1) + " on the roster.");
+        if (arrayPosClientName >= 0)
+            System.out.println("\n >> Client number found at position " + (arrayPosClientName + 1) + " on the sorted list of client numbers.");
         
         try {
-            String associatedClientName = myClients[arrayPosClientName];
+            String associatedClientName = myClients[linSearchInt(myClientNumbers, clientNumberToLookFor)];
             System.out.printf(" >> %d is the client number of %s.\n\n", 
                               clientNumberToLookFor, associatedClientName);
         } catch (ArrayIndexOutOfBoundsException ex3) {
-            System.out.println("\n >> No associated client name found.\n");
+            System.out.println("\n >> No client with the number " + clientNumberToLookFor +  " found.");
         }
     }
 
@@ -499,10 +542,12 @@ public class ArraySearchAndSort {
         boolean inputCheck = false;
         int clientNumberToLookFor = -1;
 
+        // Prompt the user for a client number
+        System.out.print("\nPlease enter a client number: ");
+
         // Try to scan and store an integer value 
         do {
             try {
-                System.out.print("Please enter a client's number: ");
                 clientNumberToLookFor = sc.nextInt();
                 inputCheck = true;
             } catch (InputMismatchException e) {
@@ -521,7 +566,7 @@ public class ArraySearchAndSort {
         try {
             associatedClientName = myClients[arrayPosClientName];
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("\n >> No associated client name found.\n");
+            System.out.println("\n >> No associated client name found.");
             return;
         }
         
@@ -530,8 +575,10 @@ public class ArraySearchAndSort {
         boolean inputCheck2 = false;
         
         // Prompt the user to enter in a new client number
+        System.out.printf("Enter the new client number to replace %d: ", clientNumberToLookFor);
+
+        // Repeat until a valid client number is entered
         do {
-            System.out.printf("Enter the new client number to replace %d: ", clientNumberToLookFor);
             try {
                 newClientNumber = sc.nextInt();
 
@@ -548,10 +595,10 @@ public class ArraySearchAndSort {
                 inputCheck2 = true;
 
             } catch (InputMismatchException e) {
-                sc.next();
+                //sc.next();
                 System.out.print("Please enter a valid integer --> ");
             } catch (Exception e) {
-                sc.next();
+                //sc.next();
                 System.out.print("Please enter an integer other than 0 or one that's already in the database --> ");
             }
         } while (!inputCheck2);
@@ -572,7 +619,7 @@ public class ArraySearchAndSort {
         } 
 
         // Print out the user the change made
-        System.out.printf("\n >> %s's client number was changed from %d to %d.\n\n", 
+        System.out.printf("\n >> %s's client number was changed from %d to %d.\n", 
                           associatedClientName, clientNumberToLookFor, newClientNumber);
 
     }
@@ -623,7 +670,7 @@ public class ArraySearchAndSort {
             System.err.println("\n" + e.getMessage() + "\n");
         } 
 
-        System.out.printf("\n >> Client %d's name was changed from %s to %s\n\n", 
+        System.out.printf("\n >> Client %d's name was changed from %s to %s.\n", 
                           associatedClientNo, clientToLookFor, newClientName);
 
     }
@@ -896,11 +943,20 @@ public class ArraySearchAndSort {
 
                 for (int z = 1; z < minLength; z++) {
                     if (search.toLowerCase().charAt(z) > strArray[index].toLowerCase().charAt(z)) {
+                        if (lower == index) {
+                            return -1;
+                        }
                         lower = index;
                         break;
                     } else if (search.toLowerCase().charAt(z) == strArray[index].toLowerCase().charAt(z)) {
+                        if (z == minLength - 1) {
+                            return -1;
+                        }
                         continue;
                     } else {
+                        if (upper == index) {
+                            return -1;
+                        }
                         upper = index;
                         break;
                     }
@@ -915,10 +971,11 @@ public class ArraySearchAndSort {
     /**
      * Performs a bubble sort on an array of integers
      * @param array array of integers to be sorted
+     * @param boolean option to print each step
      * @return the same array but sorted in order from
      *         lowest to highest integer
      */
-    public static int[] bubbleSortInt(int[] intArray) 
+    public static int[] bubbleSortInt(int[] intArray, boolean print) 
     {
         int length = intArray.length;
 
@@ -940,10 +997,12 @@ public class ArraySearchAndSort {
                 }
             }
 
-            // Print out the arrays at each step 
+            // Print out the arrays at each step if print is true
             // Show the sorting in action
-            System.out.println(Arrays.toString(intArray));
-
+            if (print) {
+                System.out.println("Step " + (i + 1) + ": " + Arrays.toString(intArray));
+            }
+            
             if (equalityCounter == length - 1) {
                 break;
             }
@@ -957,9 +1016,10 @@ public class ArraySearchAndSort {
      * it works past the first letter to the end of 
      * each word
      * @param array array of strings to be sorted
+     * @param boolean option to print each step
      * @return the same array but sorted alphabetically
      */
-    public static String[] bubbleSortStr(String[] strArray) {
+    public static String[] bubbleSortStr(String[] strArray, boolean print) {
         String tempStr;
         int thisLength, nextLength, minLength;
         int length = strArray.length;
@@ -997,9 +1057,11 @@ public class ArraySearchAndSort {
                 }
             }
 
-            // Print out the arrays at each step 
+            // Print out the arrays at each step if print is true
             // Show the sorting in action
-            System.out.println(Arrays.toString(strArray));
+            if (print) {
+                System.out.println("Step " + (i + 1) + ": " + Arrays.toString(strArray));
+            }
 
             if (equalityCounter == length - 1) {
                 break;
@@ -1031,7 +1093,7 @@ public class ArraySearchAndSort {
         try {
             firstTwoChar = searchChoice.substring(0,2);
         } catch (StringIndexOutOfBoundsException o) {
-            System.out.println("Not a valid command.\n");
+            System.out.println("\nNot a valid command.");
         }
         return firstTwoChar;
 
@@ -1075,9 +1137,9 @@ public class ArraySearchAndSort {
         Date myDate = new Date();
         String myDateFormat = "MM/dd/yyy";
         SimpleDateFormat dtToday = new SimpleDateFormat(myDateFormat);
-        System.out.println("\n\n------------------------------------");
-        System.out.println("---------- Session Summary ---------");
-        System.out.println("------------------------------------\n");
+        System.out.println("\n\n--------------------------------------------");
+        System.out.println("-------------- Session Summary -------------");
+        System.out.println("--------------------------------------------\n");
         System.out.println("Pathways accessed: " + pathwaysAccessed + "\n");
         System.out.println("\n----- Original ------  ------ Changes ------");
         System.out.printf("%-12s", "Name");
@@ -1180,10 +1242,11 @@ public class ArraySearchAndSort {
     /**
      * Performs an insertion sort on an array of integers
      * @param array array of integers to be sorted
+     * @param boolean option to print each step
      * @return the same array but sorted in order from
      *         lowest to highest integer
      */
-    public static int[] insertionSortInt(int[] intArray) {
+    public static int[] insertionSortInt(int[] intArray, boolean print) {
         int length = intArray.length;
 
         for (int j = 0; j < length - 1; j++) {
@@ -1226,7 +1289,9 @@ public class ArraySearchAndSort {
             }
             // Print out the arrays at each step 
             // Show the sorting in action
-            System.out.println(Arrays.toString(intArray));
+            if (print) {
+                System.out.println("Step " + (j+1) + ": " + Arrays.toString(intArray));
+            }
         }
         return intArray;
     }    
@@ -1236,9 +1301,10 @@ public class ArraySearchAndSort {
     * Note: the method only takes into account the first
     * letter of each string (not the other letters).
     * @param array array of strings to be sorted
+    * @param boolean option to print each step
     * @return the same array but sorted alphabetically
     */ 
-    public static String[] insertionSortStr(String[] strArray) {
+    public static String[] insertionSortStr(String[] strArray, boolean print) {
         int length = strArray.length;
         String tempStr = "";
         String temp;
@@ -1333,9 +1399,11 @@ public class ArraySearchAndSort {
                     }
                 }
             }
-            // Print out the arrays at each step 
+            // Print out the arrays at each step if print is true 
             // Show the sorting in action
-            System.out.println("Step " + (j+1) + ": " + Arrays.toString(strArray));
+            if (print) {
+                System.out.println("Step " + (j+1) + ": " + Arrays.toString(strArray));
+            }
         }
         return strArray;
     }    
