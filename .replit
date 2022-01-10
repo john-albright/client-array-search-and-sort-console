@@ -1,0 +1,2 @@
+language = "java10"
+run = "export CLASSPATH=\".:./jars/*\"; java ArraySearchAndSort.java; java ArraySearchAndSort"
